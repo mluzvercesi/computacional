@@ -1,72 +1,104 @@
-# include <stdio.h>
-# include <stdlib.h>
-# include <math.h>
-# include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
 
-#define A 16807
-#define M 2147483647
-#define Q 127773
-#define R 2836
 
-//int clasificar (int *red, int N);
-//int percolar(int *red);
-//double random(int *semilla);
-int poblar(int *red, double P, int N);
+int poblar(int *red, int N, double P);
 int imprimir(int *red, int N);
+int clasificar(int *red, int N);
+int etiquetafalsa(int *red, int *historial, int S1, int S2, int i);
+
 
 // MAIN
-// Primero creamos la red
-int main(int argc, char *argv[])
+int main()
 	{
-	int *red;
 	int N;
 	double P;
-	N = argv[0];
-	P = argv[1];
+	int *red;
+	
+	N = 8;
+	P = 0.5;
 	red = (int*)malloc(N*N*sizeof(int));
-	poblar(int *red, double P, int N);
-	imprimir(int *red, int N);
+	
+	poblar(red,N,P);	
+	imprimir(red,N);
 	return 0;
 	}
 
-// FUNCIONES
-/*double random(int *semilla)
-	{
-	int K;
-	double x;
 
-	K = (*semilla) / Q;
-	*semilla =  A *(*semilla) - K *Q - K*R;
-
-	if (*semilla < 0.0)
-		*semilla = (*semilla)+M;
-
-	x = (*semilla) * (1.0/M);
-	return x;
-	}*/
-
-int poblar(int *red, double P, int N) //función que puebla la red
+int poblar(int *red, int N, double P) //función que puebla la red
 	{
 	int i;
-	int *semilla;
-	semilla = srand(time(NULL)); //???????????
+	float random;
+	srand(time(NULL));
 	for (i=0; i<N*N; i++)
-		{
-		if (1 < P) //(random(*semilla) < P)
-		*(red+i) = 1;
+		{random = (float)rand()/(float)RAND_MAX;
+		if (random < P)
+			*(red+i) = 1;
 		}
-	return = 0;
+	return 0;
 	}
 
 int imprimir(int *red, int N)
 	{
 	int i,j;
-	for (i=0; i < N; i++)
+	for (i=0; i<N; i++)
 		{
-		for (j=0; j < N; j++)
-		printf("%d ", *(red+N+i+j));
-		printf("/n");
+		for (j=0; j<N; j++)
+			printf("%d ", *(red+N*i+j));
+		printf("\n");
 		}
+	return 0;
+	}
+
+int clasificar(int *red, int N)
+	{
+	int i;
+	int frag; //etiqueta
+	frag = 2; //por que empezaba en 2??
+	for (i=0; i<N; i++) //recorro la primera fila
+	{if (*(red+i))
+		{*(red+i)=frag;
+		frag++;
+		}
+		
+	}
+	
+	return 0;
+	}
+
+int etiquetafalsa(int *red, int *historial, int S1, int S2, int i)
+	{
+	int minimo, maximo;
+
+	while (*(historial+S1)<0)
+		S1 = -(*(historial+S1));
+
+	while (*(historial+S2)<0)
+		S2 = -(*(historial+S2));
+
+//ahora tengo la etiqueta verdadera de mis vecinos
+//quiero asignarle la menor
+
+	if (S1<S2)
+	{
+	minimo=S1;
+	maximo=S2;
+	}
+	else
+	{
+	minimo=S2;
+	maximo=S1;
+	}
+
+	*(red+i) = minimo;
+	*(historial+maximo) = -minimo; 
+//los que antes eran el valor max ahora son el min pero falso (por eso el -) 
+//este queda mal igual si S1=S2
+	*(historial+minimo) = minimo; 
+// esto es por las dudas, ya debería valer minimo
+// ademas la ultima linea salva el caso S1=S2
 	return 0;
 	}
 
