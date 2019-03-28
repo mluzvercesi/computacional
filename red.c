@@ -11,18 +11,18 @@ int etiquetafalsa(int *red, int *historial, int S1, int S2, int i);
 
 
 // MAIN
-int main()
+int main(int argc, char * argv[])
 	{
-	int N;
-	double P;
+	int N = atoi(argv[1]);
+	double P = atof(argv[2]);
 	int *red;
-	
-	N = 8;
-	P = 0.5;
+	printf("%s %s \n", "Lado", argv[1]);
+        printf("%s %s \n", "Prob", argv[2]);
 	red = (int*)malloc(N*N*sizeof(int));
 	
 	poblar(red,N,P);	
 	imprimir(red,N);
+
 	return 0;
 	}
 
@@ -52,7 +52,7 @@ int imprimir(int *red, int N)
 	return 0;
 	}
 
-int clasificar(int *red, int N)
+/*int clasificar(int *red, int N)
 	{
 	int i;
 	int frag; //etiqueta
@@ -101,5 +101,6 @@ int etiquetafalsa(int *red, int *historial, int S1, int S2, int i)
 // ademas la ultima linea salva el caso S1=S2
 	return 0;
 	}
+*/
 
 
