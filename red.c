@@ -8,14 +8,14 @@ int poblar(int *red, int N, double P);
 int imprimir(int *red, int N);
 int clasificar(int *red, int N);
 int actualizar(int *local, int *historial, int S, int *frag);
-int etiquetafalsa(int *local, int *historial, int S1, int S2);
-int corregir(int *red, int N);
+int etiqueta_verdadera(int *historial, int S);
+int etiqueta_falsa(int *local, int *historial, int S1, int S2);
 
 
 //------------MAIN-------------
 int main() //(int argc, char * argv[])
 {
-	int N = 8;
+	int N = 5;
 	double P = 0.5;
 	//si ingreso argumentos a main uso las dos lineas que siguen
 	//int N = atoi(argv[1]);
@@ -96,12 +96,11 @@ int clasificar(int *red, int N)
 		//el resto de la red, donde puede haber conflictos de etiquetas
 		for (j=1; j<N; j++)
 		if (*(red+N*i+j))
-			{int S1 = *(red+N*(i-1)+j);
-			int S2 = *(red+N*i+j-1);
-			if (S1*S1)
-				etiquetafalsa(red+N*i+j, historial, S1, S2);
-			//hay conflicto xq ambos lugares tienen elementos COMPLETAR
-			else //no hay conflicto porque solo un lugar tiene un elemento
+			{int S1 = *(red+N*(i-1)+j); //vecino arriba
+			int S2 = *(red+N*i+j-1); //vecino izq
+			if (S1*S2) //hay conflicto porque ambos lugares estan ocupados
+				etiqueta_falsa(red+N*i+j, historial, S1, S2);
+			else //no hay conflicto
 				{if (S1) //el unico vecino es S1
 					actualizar(red+N*i+j, historial, S1, frag);
 				else //el unico vecino es S2
@@ -109,6 +108,13 @@ int clasificar(int *red, int N)
 				}
 			}
 	}
+	
+	//corrijo las etiquetas
+	for (i=0; i<N*N; i++)
+	{j = *(red+i);
+	*(red+i) = etiqueta_verdadera(historial, j);
+	}
+
 return 0;
 }
 
@@ -118,32 +124,33 @@ int actualizar(int *local, int *historial, int S, int *frag)
 //sino copia la etiqueta VERDADERA
 //OJO! El puntero es local asi que evaluar actualizar en (red+i)
 	if (S==0)
-	{*local=*frag;
+	{*local = *frag;
 	(*frag)++;
 	}
 	else
 	{
-	//para rastrear etiquetas verdaderas
-	while (*(historial+S)<0)
-		S=-(*(historial+S));
-	*local=S;
+	*local = etiqueta_verdadera(historial,S);
 	}
 return 0;
 }
 
 
-int etiquetafalsa(int *local, int *historial, int S1, int S2)
+int etiqueta_verdadera(int *historial, int S)
+{
+	while (*(historial+S)<0)
+		S=-(*(historial+S));
+return S;
+}
+
+
+int etiqueta_falsa(int *local, int *historial, int S1, int S2)
 {
 	int minimo, maximo;
 
-	while (*(historial+S1)<0)
-		S1 = -(*(historial+S1));
+	S1 = etiqueta_verdadera(historial, S1);
+	S2 = etiqueta_verdadera(historial, S2);
 
-	while (*(historial+S2)<0)
-		S2 = -(*(historial+S2));
-
-//ahora tengo la etiqueta verdadera de mis vecinos
-//quiero asignarle la menor
+//quiero asignar la menor etiqueta verdadera
 
 	if (S1<S2)
 	{
@@ -165,15 +172,4 @@ int etiquetafalsa(int *local, int *historial, int S1, int S2)
 // ademas la ultima linea salva el caso S1=S2
 return 0;
 }
-
-
-int corregir(int *red, int N)
-{
-	int i;
-	for (i=0;i<N*N; i++)
-		{
-		}
-return 0;
-}
-
 
