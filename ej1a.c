@@ -3,7 +3,7 @@
 #include <math.h>
 #include <time.h>
 
-
+int cuerpo(double P);
 int poblar(int *red, int N, double P);
 int imprimir(int *red, int N);
 int clasificar(int *red, int N);
@@ -13,26 +13,58 @@ int etiqueta_falsa(int *local, int *historial, int S1, int S2);
 int percola(int *red, int N);
 
 
+
 //------------MAIN-------------
-int main(){ //(int argc, char * argv[])
-	int N = 16;
-	double P = 0.52;
-	//si ingreso argumentos a main uso las dos lineas que siguen
-	//int N = atoi(argv[1]);
-	//double P = atof(argv[2]);
-	int *red;
-	red = (int*)malloc(N*N*sizeof(int));
+int main(){
+	int PERC,n,m;
+	double TOL = 0.0001;
+	double P, DIF;
+	FILE *fp;
 	
-	poblar(red,N,P);
-	imprimir(red,N);
-	clasificar(red,N);
-	printf("\n");
-	imprimir(red,N);
-	percola(red,N);
+	for (m=0;m<10;m++){
+		P = 0.0;
+		DIF = 0.5;
+		PERC=0;
+		n = 1;
+		while (DIF>TOL){
+			DIF = pow(0.5,n);
+			
+			if (PERC == 0){
+				P = P + DIF;
+				PERC = cuerpo(P);
+			}
+			else{
+				P = P - DIF;
+				PERC = cuerpo(P);
+			}
+			n++;
+		}
+		printf("P = %f \n", P);
+		printf("m = %d \n",m);
+		/*fp=fopen("resultados.txt", "w");
+		if(fp == NULL)
+			exit(-1);
+		fprintf(fp, "P \t %f \n", P);
+		fclose(fp);*/
+	}
+
 return 0;
 }
 
+
 //----------FUNCIONES----------
+int cuerpo(double P){
+	int N = 4;
+	int *red;
+	red = (int*)malloc(N*N*sizeof(int));
+	int PERC;
+	
+	poblar(red,N,P);
+	clasificar(red,N);
+	PERC = percola(red,N);
+return PERC;
+}
+
 
 int poblar(int *red, int N, double P){
 //llena la red cuadrada de lado N con prob P
@@ -173,8 +205,7 @@ return 0;
 
 int percola(int *red, int N){
 	int i,j;
-	int p;
-	p = 0;
+	int p = 0;
 	for (i=0; i<N; i++){
 		if (*(red+i)!=0)
 			for (j=0; j<N; j++)
@@ -185,9 +216,6 @@ int percola(int *red, int N){
 		if (p==1)
 			break;
 		}
-	if (p==1)
-		printf("Percola \n");
-	else printf("No percola \n");
 return p;
 }
 
