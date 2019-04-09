@@ -10,13 +10,13 @@ int clasificar(int *red, int N);
 int actualizar(int *local, int *historial, int S, int *frag);
 int etiqueta_verdadera(int *historial, int S);
 int etiqueta_falsa(int *local, int *historial, int S1, int S2);
+int percola(int *red, int N);
 
 
 //------------MAIN-------------
-int main() //(int argc, char * argv[])
-{
+int main(){ //(int argc, char * argv[])
 	int N = 5;
-	double P = 0.5;
+	double P = 0.8;
 	//si ingreso argumentos a main uso las dos lineas que siguen
 	//int N = atoi(argv[1]);
 	//double P = atof(argv[2]);
@@ -28,14 +28,14 @@ int main() //(int argc, char * argv[])
 	clasificar(red,N);
 	printf("\n");
 	imprimir(red,N);
-	
+	percola(red,N);
 return 0;
 }
 
 //----------FUNCIONES----------
 
-int poblar(int *red, int N, double P)
-{//llena la red cuadrada de lado N con prob P
+int poblar(int *red, int N, double P){
+//llena la red cuadrada de lado N con prob P
 	int i;
 	float random;
 	srand(time(NULL));
@@ -48,8 +48,8 @@ return 0;
 }
 
 
-int imprimir(int *red, int N) //para mostrar la red creada
-{
+int imprimir(int *red, int N){
+//para mostrar la red creada
 	int i,j;
 	for (i=0; i<N; i++)
 		{
@@ -61,8 +61,7 @@ return 0;
 }
 
 
-int clasificar(int *red, int N)
-{
+int clasificar(int *red, int N){
 	int i,j;
 	int *frag; //contador de fragmentos o clusters
 	frag = (int*)malloc(sizeof(int));
@@ -119,8 +118,8 @@ return 0;
 }
 
 
-int actualizar(int *local, int *historial, int S, int *frag)
-{//si S=0 le pone etiqueta e incrementa frag
+int actualizar(int *local, int *historial, int S, int *frag){
+//si S=0 le pone etiqueta e incrementa frag
 //sino copia la etiqueta VERDADERA
 //OJO! El puntero es local asi que evaluar actualizar en (red+i)
 	if (S==0)
@@ -135,16 +134,14 @@ return 0;
 }
 
 
-int etiqueta_verdadera(int *historial, int S)
-{
+int etiqueta_verdadera(int *historial, int S){
 	while (*(historial+S)<0)
 		S=-(*(historial+S));
 return S;
 }
 
 
-int etiqueta_falsa(int *local, int *historial, int S1, int S2)
-{
+int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 	int minimo, maximo;
 
 	S1 = etiqueta_verdadera(historial, S1);
@@ -170,6 +167,19 @@ int etiqueta_falsa(int *local, int *historial, int S1, int S2)
 	*(historial+minimo) = minimo;
 // esto es por las dudas, ya debería valer minimo
 // ademas la ultima linea salva el caso S1=S2
+return 0;
+}
+
+
+int percola(int *red, int N){
+	int i;
+	for (i=0; i<N; i++)
+		if (*(red+i)!=0)
+			if (*(red+i) == *(red+N*(N-1)+i))
+				{goto stop;
+				}
+	printf("No percola \n");
+	stop: {printf("Percola \n");};
 return 0;
 }
 
