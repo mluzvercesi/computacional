@@ -3,7 +3,9 @@
 #include <math.h>
 #include <time.h>
 
-int cuerpo(double P);
+#define MAXFILENAME 100
+
+int cuerpo(double P, int N);
 int poblar(int *red, int N, double P);
 int imprimir(int *red, int N);
 int clasificar(int *red, int N);
@@ -19,33 +21,39 @@ int main(){
 	int PERC,n,m;
 	double TOL = 0.0001;
 	double P, DIF;
+	int N = 128; //tamaño de la red
 	FILE *fp;
-	
-	for (m=0;m<10;m++){
+	srand(time(NULL));
+
+	for (m=0;m<100;m++){
 		P = 0.0;
 		DIF = 0.5;
 		PERC=0;
 		n = 1;
+
 		while (DIF>TOL){
 			DIF = pow(0.5,n);
-			
+
 			if (PERC == 0){
 				P = P + DIF;
-				PERC = cuerpo(P);
+				PERC = cuerpo(P, N);
 			}
 			else{
 				P = P - DIF;
-				PERC = cuerpo(P);
+				PERC = cuerpo(P, N);
 			}
 			n++;
 		}
-		printf("P = %f \n", P);
-		printf("m = %d \n",m);
-		/*fp=fopen("resultados.txt", "w");
+		// printf("P = %f \n", P);
+		// printf("m = %d \n",m);
+
+		char fn[MAXFILENAME+1];
+		snprintf(fn, MAXFILENAME, "proba_lado_%d.txt", N); //para que las probas de cada tamaño de red sean distintos archivos
+		fp = fopen(fn, "a"); //"a" es append, mientras que "w" sobreescribe
 		if(fp == NULL)
 			exit(-1);
-		fprintf(fp, "P \t %f \n", P);
-		fclose(fp);*/
+		fprintf(fp, "%f \n", P);
+		fclose(fp);
 	}
 
 return 0;
@@ -53,15 +61,16 @@ return 0;
 
 
 //----------FUNCIONES----------
-int cuerpo(double P){
-	int N = 4;
+int cuerpo(double P, int N){
 	int *red;
 	red = (int*)malloc(N*N*sizeof(int));
 	int PERC;
-	
+
 	poblar(red,N,P);
 	clasificar(red,N);
 	PERC = percola(red,N);
+
+	free(red);
 return PERC;
 }
 
@@ -70,7 +79,6 @@ int poblar(int *red, int N, double P){
 //llena la red cuadrada de lado N con prob P
 	int i;
 	float random;
-	srand(time(NULL));
 	for (i=0; i<N*N; i++)
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
@@ -102,20 +110,21 @@ int clasificar(int *red, int N){
 	historial = (int*)malloc(N*N/2*sizeof(int));
 	for (i=0; i<N*N/2; i++)
 		*(historial+i) = i;
-	
+
 	//el primer lugar de la red
 	if (*red)
-	{*(red)=*frag;
-	(*frag)++;
-	}
-	
-	//la primera fila, solo miro el vecino a izq
-	for (i=1; i<N; i++)
-	if (*(red+i))
-		{int S = *(red+i-1);
-		actualizar(red+i, historial, S, frag);
+		{*(red)=*frag;
+		(*frag)++;
 		}
-	
+
+	//la primera fila, solo miro el vecino a izq
+	for (i=1; i<N; i++){
+		if (*(red+i))
+			{int S = *(red+i-1);
+			actualizar(red+i, historial, S, frag);
+			}
+		}
+
 	//la primera columna, solo miro vecino arriba
 	for (i=1; i<N; i++)
 	{
@@ -123,7 +132,7 @@ int clasificar(int *red, int N){
 			{int S = *(red+N*(i-1));
 			actualizar(red+N*i, historial, S, frag);
 			}
-		
+
 		//el resto de la red, donde puede haber conflictos de etiquetas
 		for (j=1; j<N; j++)
 		if (*(red+N*i+j))
@@ -139,12 +148,15 @@ int clasificar(int *red, int N){
 				}
 			}
 	}
-	
+
 	//corrijo las etiquetas
 	for (i=0; i<N*N; i++)
-	{j = *(red+i);
-	*(red+i) = etiqueta_verdadera(historial, j);
-	}
+		{j = *(red+i);
+		*(red+i) = etiqueta_verdadera(historial, j);
+		}
+
+free(frag);
+free(historial);
 
 return 0;
 }
@@ -194,7 +206,7 @@ int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 
 	*local = minimo;
 	*(historial+maximo) = -minimo;
-//los que antes eran el valor max ahora son el min pero falso (por eso el -) 
+//los que antes eran el valor max ahora son el min pero falso (por eso el -)
 //este queda mal igual si S1=S2
 	*(historial+minimo) = minimo;
 // esto es por las dudas, ya debería valer minimo
@@ -204,6 +216,7 @@ return 0;
 
 
 int percola(int *red, int N){
+	// Devuelve 1 si percola, 0 si no percola
 	int i,j;
 	int p = 0;
 	for (i=0; i<N; i++){
@@ -218,4 +231,3 @@ int percola(int *red, int N){
 		}
 return p;
 }
-
