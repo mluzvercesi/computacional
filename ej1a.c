@@ -24,6 +24,7 @@ int main(){
 	FILE *fp;
 	srand(time(NULL));
 	int *red;
+	red = (int*)malloc(N*N*sizeof(int));
 
 	for (m=0;m<100;m++){
 		P = 0.0;
@@ -32,7 +33,6 @@ int main(){
 		n = 1;
 
 		while (DIF>TOL){
-			red = (int*)malloc(N*N*sizeof(int));
 			DIF = pow(0.5,n);
 
 			if (PERC == 0){
@@ -47,8 +47,6 @@ int main(){
 				clasificar(red,N);
 				PERC = percola(red,N);
 			}
-			red=NULL;
-			free(red);
 			n++;
 		}
 		// printf("P = %f \n", P);
@@ -62,7 +60,8 @@ int main(){
 		fprintf(fp, "%f \n", P);
 		fclose(fp);
 	}
-
+	
+	free(red);
 return 0;
 }
 
@@ -77,6 +76,8 @@ int poblar(int *red, int N, double P){
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
 			*(red+i) = 1;
+		else 
+			*(red+i) = 0;
 		}
 return 0;
 }
