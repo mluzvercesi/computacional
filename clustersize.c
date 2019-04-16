@@ -18,80 +18,17 @@ int cluster_size(int *red, int N);
 
 //------------MAIN-------------
 int main(){
-	int PERC,m;
-	double P;
-	int N = 4; //tamaño de la red
-	int M = 10; //repeticiones
-	char fn[255];
-	sprintf(fn,"proba_percola.txt");
-	FILE *fp = fopen(fn,"w");
+	double P = 0.59;
+	int N = 16; //tamaño de la red
 	srand(time(NULL));
 	int *red;
 	red = (int*)malloc(N*N*sizeof(int));
-	P = 0;
-	
-	
-	//loop para probabilidades
-	fp = fopen(fn, "a");
-	fprintf(fp, "Probabilidad; 0 si no percola, 1 si percola \n");
 
-	//primer loop hasta 0.55
-	for (P=0; P<0.545; P=P+0.05){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-	
-	for (P=0.55; P<0.59; P=P+0.005){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-	
-	for (P=0.59; P<0.60; P=P+0.0001){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
+	poblar(red,N,P);
+	clasificar(red,N);
+	imprimir(red,N);
+	cluster_size(red,N);
 
-	for (P=0.60; P<0.65; P=P+0.005){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-
-	for (P=0.65; P<1; P=P+0.05){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-	
-	fclose(fp);
 	free(red);
 return 0;
 }
@@ -258,16 +195,15 @@ int percola(int *red, int N){
 return p;
 }
 
+//corregir el tamaño de la variable clusters y ver como puede devolver el array
 int cluster_size(int *red, int N){
 	int i,t;
-	int *clusters;
-	clusters = (int*)malloc(N*N/2*sizeof(int));
+	int clusters[400]={0};
 	for (i=0; i<N*N; i++){
 		t = *(red+i);
 		clusters[t]++;
 	}
 	for (i=0; i<N*N; i++)
-		printf("%d ", *(clusters+i));
-	free(clusters);
+		printf("%d ", clusters[i]);
 return 0;
 }
