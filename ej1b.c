@@ -20,38 +20,77 @@ int main(){
 	int PERC,m;
 	double P;
 	int N = 4; //tamaño de la red
-	FILE *fp;
+	int M = 10; //repeticiones
+	char fn[255];
+	sprintf(fn,"proba_percola.txt");
+	FILE *fp = fopen(fn,"w");
 	srand(time(NULL));
 	int *red;
 	red = (int*)malloc(N*N*sizeof(int));
 	P = 0;
 	
-	//falta: for para probabilidades
-	//P = algo en el archivo
-	//que significa snprintf??
-	for (m=0;m<100;m++){
-		poblar(red,N,P);
-		clasificar(red,N);
-		PERC = percola(red,N);
-		}
-		// printf("P = %f \n", P);
-		// printf("m = %d \n",m);
-
-		char fn[MAXFILENAME+1];
-		snprintf(fn, MAXFILENAME, "proba_percola_%d.txt", PERC);
-		fp = fopen(fn, "a"); //"a" es append, mientras que "w" sobreescribe
-		if(fp == NULL)
-			exit(-1);
-		fprintf(fp, "%f \t", PERC);
-		fclose(fp);
-	}
-	snprintf(fn, MAXFILENAME, "proba_percola_%d.txt", PERC);
-	fp = fopen(fn, "a"); //"a" es append, mientras que "w" sobreescribe
-	if(fp == NULL)
-	exit(-1);
-	fprintf(fp, "\n");
-	fclose(fp);
 	
+	//loop para probabilidades
+	fp = fopen(fn, "a");
+	fprintf(fp, "Probabilidad; 0 si no percola, 1 si percola \n");
+
+	//primer loop hasta 0.55
+	for (P=0; P<0.545; P=P+0.05){	
+		fprintf(fp, "%f \t", P);
+		for (m=0;m<M;m++){
+			poblar(red,N,P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			fprintf(fp, "%d \t", PERC);
+		}
+		fprintf(fp, "\n");
+	}
+	
+	for (P=0.55; P<0.59; P=P+0.005){	
+		fprintf(fp, "%f \t", P);
+		for (m=0;m<M;m++){
+			poblar(red,N,P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			fprintf(fp, "%d \t", PERC);
+		}
+		fprintf(fp, "\n");
+	}
+	
+	for (P=0.59; P<0.60; P=P+0.0001){	
+		fprintf(fp, "%f \t", P);
+		for (m=0;m<M;m++){
+			poblar(red,N,P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			fprintf(fp, "%d \t", PERC);
+		}
+		fprintf(fp, "\n");
+	}
+
+	for (P=0.60; P<0.65; P=P+0.005){	
+		fprintf(fp, "%f \t", P);
+		for (m=0;m<M;m++){
+			poblar(red,N,P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			fprintf(fp, "%d \t", PERC);
+		}
+		fprintf(fp, "\n");
+	}
+
+	for (P=0.65; P<1; P=P+0.05){	
+		fprintf(fp, "%f \t", P);
+		for (m=0;m<M;m++){
+			poblar(red,N,P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			fprintf(fp, "%d \t", PERC);
+		}
+		fprintf(fp, "\n");
+	}
+	
+	fclose(fp);
 	free(red);
 return 0;
 }

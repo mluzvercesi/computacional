@@ -17,51 +17,54 @@ int percola(int *red, int N);
 
 //------------MAIN-------------
 int main(){
-	int PERC,n,m;
+	int PERC,n,m,N;
 	double TOL = 0.0001;
 	double P, DIF;
-	int N = 128; //tamaño de la red
+	int L[5] = {4, 16, 32, 64, 128};
 	FILE *fp;
 	srand(time(NULL));
 	int *red;
-	red = (int*)malloc(N*N*sizeof(int));
 
-	for (m=0;m<100;m++){
-		P = 0.0;
-		DIF = 0.5;
-		PERC=0;
-		n = 1;
-
-		while (DIF>TOL){
-			DIF = pow(0.5,n);
-
-			if (PERC == 0){
-				P = P + DIF;
-				poblar(red,N,P);
-				clasificar(red,N);
-				PERC = percola(red,N);
-			}
-			else{
-				P = P - DIF;
-				poblar(red,N,P);
-				clasificar(red,N);
-				PERC = percola(red,N);
-			}
-			n++;
-		}
-		// printf("P = %f \n", P);
-		// printf("m = %d \n",m);
-
-		char fn[MAXFILENAME+1];
-		snprintf(fn, MAXFILENAME, "proba_lado_%d.txt", N); //para que las probas de cada tamaño de red sean distintos archivos
-		fp = fopen(fn, "a"); //"a" es append, mientras que "w" sobreescribe
-		if(fp == NULL)
-			exit(-1);
-		fprintf(fp, "%f \n", P);
-		fclose(fp);
-	}
+	char fn[MAXFILENAME+1];
+	sprintf(fn,"proba_lado.txt"); //para que las probas de cada tamaño de red sean distintos archivos
+	fp = fopen(fn, "w"); //"a" es append, mientras que "w" sobreescribe
 	
-	free(red);
+	fprintf(fp, "Lado; probabilidades de iteraciones \n");
+	
+	for(int c = 0; c<5; c++){
+		N = L[c];
+		red = (int*)malloc(N*N*sizeof(int));
+		fprintf(fp, "%d \t", N);
+		
+		for (m=0;m<10;m++){
+			P = 0.0;
+			DIF = 0.5;
+			PERC=0;
+			n = 1;
+
+			while (DIF>TOL){
+				DIF = pow(0.5,n);
+
+				if (PERC == 0){
+					P = P + DIF;
+					poblar(red,N,P);
+					clasificar(red,N);
+					PERC = percola(red,N);
+				}
+				else{
+					P = P - DIF;
+					poblar(red,N,P);
+					clasificar(red,N);
+					PERC = percola(red,N);
+				}
+				n++;
+			}
+			fprintf(fp, "%f \t", P);
+		}
+		fprintf(fp, "\n");
+		free(red);
+	}
+	fclose(fp);	
 return 0;
 }
 
