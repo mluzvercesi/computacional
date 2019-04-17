@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> /* memset */
 #include <math.h>
 #include <time.h>
+#include <unistd.h> /* close */
 
 #define MAXFILENAME 100
 
@@ -36,23 +38,23 @@ return 0;
 
 //----------FUNCIONES----------
 
-int poblar(int *red, int N, double P){
 //llena la red cuadrada de lado N con prob P
+int poblar(int *red, int N, double P){
 	int i;
 	float random;
 	for (i=0; i<N*N; i++)
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
 			*(red+i) = 1;
-		else 
+		else
 			*(red+i) = 0;
 		}
 return 0;
-}
+} //cierra la función
 
 
-int imprimir(int *red, int N){
 //para mostrar la red creada
+int imprimir(int *red, int N){
 	int i,j;
 	for (i=0; i<N; i++)
 		{
@@ -60,10 +62,11 @@ int imprimir(int *red, int N){
 			printf("%d ", *(red+N*i+j));
 		printf("\n");
 		}
+printf("\n");
 return 0;
-}
+} //cierra la función
 
-
+// le asigna etiquetas a los lugares de la red con valor 1
 int clasificar(int *red, int N){
 	int i,j;
 	int *frag; //contador de fragmentos o clusters
@@ -122,9 +125,9 @@ free(frag);
 free(historial);
 
 return 0;
-}
+} //cierra la función
 
-
+//les da la etiqueta verdadera a los valores
 int actualizar(int *local, int *historial, int S, int *frag){
 //si S=0 le pone etiqueta e incrementa frag
 //sino copia la etiqueta VERDADERA
@@ -138,16 +141,16 @@ int actualizar(int *local, int *historial, int S, int *frag){
 	*local = etiqueta_verdadera(historial,S);
 	}
 return 0;
-}
+} //cierra la función
 
-
+//??
 int etiqueta_verdadera(int *historial, int S){
 	while (*(historial+S)<0)
 		S=-(*(historial+S));
 return S;
-}
+} //cierra la función
 
-
+//corrige las etiquetas y les pone un - si las tuvo que cambiar
 int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 	int minimo, maximo;
 
@@ -175,11 +178,11 @@ int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 // esto es por las dudas, ya debería valer minimo
 // ademas la ultima linea salva el caso S1=S2
 return 0;
-}
+} //cierra la función
 
 
+// Devuelve 1 si percola, 0 si no percola
 int percola(int *red, int N){
-	// Devuelve 1 si percola, 0 si no percola
 	int i,j;
 	int p = 0;
 	for (i=0; i<N; i++){
@@ -193,17 +196,19 @@ int percola(int *red, int N){
 			break;
 		}
 return p;
-}
+} //cierra la función
 
-//corregir el tamaño de la variable clusters y ver como puede devolver el array
+//da un array de tamaño N*N/2 lleno de ceros. Cada vez que encuentre en la red un valor, suma 1 en esa posición.
+//ej: la red 0220//0200//0033//0033 con N = 4 nos va a devolver una variable clusters 9 0 3 4 (hay nueve ceros, cero unos, tres dos y cuatro tres)
 int cluster_size(int *red, int N){
 	int i,t;
-	int clusters[400]={0};
+	int clusters[N*N/2];
+	memset(clusters, 0, N*N/2*sizeof(int) );
 	for (i=0; i<N*N; i++){
 		t = *(red+i);
 		clusters[t]++;
 	}
-	for (i=0; i<N*N; i++)
-		printf("%d ", clusters[i]);
+	for (i=0; i<N*N/2; i++)
+		printf(" %d ", clusters[i]);
 return 0;
-}
+} //cierra la función
