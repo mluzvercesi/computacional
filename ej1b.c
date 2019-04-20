@@ -20,79 +20,84 @@ int cluster_size(int *red, int N);
 int main(){
 	int PERC,m;
 	double P;
-	int N = 4; //tamaño de la red
-	int M = 10; //repeticiones
+	int N; //tamaño de la red
+	int M = 10000; //repeticiones
 	char fn[255];
-	sprintf(fn,"proba_percola.txt");
-	FILE *fp = fopen(fn,"w");
-	srand(time(NULL));
+	int L[5] = {4, 16, 32, 64, 128};
 	int *red;
-	red = (int*)malloc(N*N*sizeof(int));
-	P = 0;
-	
-	
-	//loop para probabilidades
-	fp = fopen(fn, "a");
-	fprintf(fp, "Probabilidad; 0 si no percola, 1 si percola \n");
 
-	//primer loop hasta 0.55
-	for (P=0; P<0.545; P=P+0.05){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-	
-	for (P=0.55; P<0.59; P=P+0.005){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
-	
-	for (P=0.59; P<0.60; P=P+0.0001){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
+	for(int c = 0; c<5; c++){
+		N = L[c];
+		sprintf(fn,"proba_percola_lado_%d.txt", N);
+		red = (int*)malloc(N*N*sizeof(int));
+		P = 0;
+		FILE *fp = fopen(fn,"w");
+		srand(time(NULL));
 
-	for (P=0.60; P<0.65; P=P+0.005){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
-		}
-		fprintf(fp, "\n");
-	}
 
-	for (P=0.65; P<1; P=P+0.05){	
-		fprintf(fp, "%f \t", P);
-		for (m=0;m<M;m++){
-			poblar(red,N,P);
-			clasificar(red,N);
-			PERC = percola(red,N);
-			fprintf(fp, "%d \t", PERC);
+		//loop para probabilidades
+		fp = fopen(fn, "a");
+		fprintf(fp, "Probabilidad; 0 si no percola, 1 si percola \n");
+
+		//primer loop hasta 0.55
+		for (P=0; P<0.545; P=P+0.05){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
 		}
-		fprintf(fp, "\n");
+
+		for (P=0.55; P<0.59; P=P+0.005){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.59; P<0.60; P=P+0.0001){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.60; P<0.65; P=P+0.005){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.65; P<1; P=P+0.05){ //no sé por qué va hasta 0.75 en lugar dehasta 1
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		fclose(fp);
+		free(red);
 	}
-	
-	fclose(fp);
-	free(red);
 return 0;
 }
 
@@ -107,7 +112,7 @@ int poblar(int *red, int N, double P){
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
 			*(red+i) = 1;
-		else 
+		else
 			*(red+i) = 0;
 		}
 return 0;

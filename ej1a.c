@@ -28,15 +28,15 @@ int main(){
 	char fn[MAXFILENAME+1];
 	sprintf(fn,"proba_lado.txt"); //para que las probas de cada tamaño de red sean distintos archivos
 	fp = fopen(fn, "w"); //"a" es append, mientras que "w" sobreescribe
-	
+
 	fprintf(fp, "Lado; probabilidades de iteraciones \n");
-	
+
 	for(int c = 0; c<5; c++){
 		N = L[c];
 		red = (int*)malloc(N*N*sizeof(int));
 		fprintf(fp, "%d \t", N);
-		
-		for (m=0;m<10;m++){
+
+		for (m=0;m<10000;m++){
 			P = 0.0;
 			DIF = 0.5;
 			PERC=0;
@@ -64,7 +64,7 @@ int main(){
 		fprintf(fp, "\n");
 		free(red);
 	}
-	fclose(fp);	
+	fclose(fp);
 return 0;
 }
 
@@ -79,7 +79,7 @@ int poblar(int *red, int N, double P){
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
 			*(red+i) = 1;
-		else 
+		else
 			*(red+i) = 0;
 		}
 return 0;

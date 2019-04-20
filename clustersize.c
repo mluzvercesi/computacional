@@ -14,22 +14,36 @@ int actualizar(int *local, int *historial, int S, int *frag);
 int etiqueta_verdadera(int *historial, int S);
 int etiqueta_falsa(int *local, int *historial, int S1, int S2);
 int percola(int *red, int N);
-int cluster_size(int *red, int N);
 
 
 
 //------------MAIN-------------
 int main(){
 	double P = 0.59;
-	int N = 16; //tamaño de la red
+	int N; //tamaño de la red
 	srand(time(NULL));
 	int *red;
+	int i,t;
+	int clusters[N*N/2];
 	red = (int*)malloc(N*N*sizeof(int));
+	FILE *fp;
 
+
+	char fn[MAXFILENAME+1];
+	sprintf(fn,"cluster_size.txt"); //para que las probas de cada tamaño de red sean distintos archivos
+	fp = fopen(fn, "w");
+
+	fprintf(fp, "La primera columna son las probabilidades, las siguientes son el tamaño de cluster de cada número en orden 0 1 2 3... \n");
 	poblar(red,N,P);
 	clasificar(red,N);
 	imprimir(red,N);
-	cluster_size(red,N);
+
+	memset(clusters, 0, N*N/2*sizeof(int) );
+	for (i=0; i<N*N; i++){
+		t = *(red+i);
+		clusters[t]++;
+		fprintf(fp, "%d\t", clusters[i]); //devuelve una tabla donde cada fila corresponde a una proba y cada columna es el tamaño de un cluster
+	}
 
 	free(red);
 return 0;
@@ -196,19 +210,4 @@ int percola(int *red, int N){
 			break;
 		}
 return p;
-} //cierra la función
-
-//da un array de tamaño N*N/2 lleno de ceros. Cada vez que encuentre en la red un valor, suma 1 en esa posición.
-//ej: la red 0220//0200//0033//0033 con N = 4 nos va a devolver una variable clusters 9 0 3 4 (hay nueve ceros, cero unos, tres dos y cuatro tres)
-int cluster_size(int *red, int N){
-	int i,t;
-	int clusters[N*N/2];
-	memset(clusters, 0, N*N/2*sizeof(int) );
-	for (i=0; i<N*N; i++){
-		t = *(red+i);
-		clusters[t]++;
-	}
-	for (i=0; i<N*N/2; i++)
-		printf(" %d ", clusters[i]);
-return 0;
 } //cierra la función
