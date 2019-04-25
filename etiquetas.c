@@ -18,12 +18,12 @@ int percola(int *red, int N);
 
 
 //------------MAIN-------------
-int main(){
-	double P = 0.59; //tendriamos que loopear probas y guardarlas y agregar newline
+int main(){ //agregar como argumento la probabilidad y el tamaño de la red
+	double P = 0.59; 
 	int N=16; //tamaño de la red
 	srand(time(NULL));
 	int *red;
-	int i,j,t;
+	int i,j,t,k;
 	int clusters[N*N/2];
 	int etiquetas[N];
 	red = (int*)malloc(N*N*sizeof(int));
@@ -34,32 +34,34 @@ int main(){
 	sprintf(fn,"etiquetas_cluster_size.txt"); //para que las probas de cada tamaño de red sean distintos archivos
 	fp = fopen(fn, "w");
 
-	fprintf(fp, "C1 probabilidades; C2 - C(N*N/2+2) tamaño de cluster de cada número en orden 0 1 2 3...;  C(N*N/2+2) - C(N*N/2+2 + N/2) etiquetas cluster percolante \n");
-	poblar(red,N,P);
-	clasificar(red,N);
-	imprimir(red,N);
+	fprintf(fp, "C1 - C(N*N/2+1) tamaño de cluster de cada número en orden 0 1 2 3...;  C(N*N/2+1) - C(N*N/2+2 + N/2) etiquetas cluster percolante. \n");
+	//loop de iteraciones para una misma probabilidad
+	for (k = 0; k<10000; k++){
+		poblar(red,N,P);
+		clasificar(red,N);
 
-	memset(clusters, 0, N*N/2*sizeof(int) );
-	memset(etiquetas, 0, N*sizeof(int) );
-	for (i=0; i<N*N; i++){
-		t = *(red+i);
-		clusters[t]++;
-		if (i<N && *(red+i)!=0){
-			for (j=0; j<N; j++){
-				if (*(red+N*(N-1)+j) == *(red+i))
-					{etiquetas[i] = *(red+i);
+		memset(clusters, 0, N*N/2*sizeof(int) );
+		memset(etiquetas, 0, N*sizeof(int) );
+		for (i=0; i<N*N; i++){
+			t = *(red+i);
+			clusters[t]++;
+			if (i<N && *(red+i)!=0){
+				for (j=0; j<N; j++){
+					if (*(red+N*(N-1)+j) == *(red+i))
+						{etiquetas[i] = *(red+i);
+					}
 				}
 			}
 		}
-	}
-	for (i=0; i<N*N/2; i++){
-		fprintf(fp, "%d\t", clusters[i]); //devuelve una tabla donde cada fila corresponde a una proba y cada columna es el tamaño de un cluster
-	}
-	for (i=0; i<N; i++){
-		fprintf(fp, "e%d\t", etiquetas[i]);
-	}
-
-
+		for (i=0; i<N*N/2; i++){
+			fprintf(fp, "%d\t", clusters[i]); //imprime cluster size para cada etiqueta
+		}
+		for (i=0; i<N; i++){
+			fprintf(fp, "%d\t", etiquetas[i]); //imprime las etiquetas que percolan
+		}
+		fprintf(fp, "\n");
+	//devuelve una tabla donde cada fila corresponde a una proba y cada columna es el tamaño de un cluster, al final agrega las etiquetas de clusters percolantes
+	} //end loop iteraciones
 	free(red);
 return 0;
 }
