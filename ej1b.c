@@ -12,59 +12,92 @@ int actualizar(int *local, int *historial, int S, int *frag);
 int etiqueta_verdadera(int *historial, int S);
 int etiqueta_falsa(int *local, int *historial, int S1, int S2);
 int percola(int *red, int N);
+int cluster_size(int *red, int N);
 
 
 
 //------------MAIN-------------
 int main(){
-	int PERC,n,m,N;
-	double TOL = 0.0001;
-	double P, DIF;
+	int PERC,m;
+	double P;
+	int N; //tamaño de la red
+	int M = 10000; //repeticiones
+	char fn[255];
 	int L[5] = {4, 16, 32, 64, 128};
-	FILE *fp;
-	srand(time(NULL));
 	int *red;
-
-	char fn[MAXFILENAME+1];
-	sprintf(fn,"proba_lado.txt"); 
-	fp = fopen(fn, "w"); //"a" es append, mientras que "w" sobreescribe
-
-	fprintf(fp, "Lado; probabilidades de iteraciones \n");
 
 	for(int c = 0; c<5; c++){
 		N = L[c];
+		sprintf(fn,"proba_percola_lado_%d.txt", N);
 		red = (int*)malloc(N*N*sizeof(int));
-		fprintf(fp, "%d \t", N);
+		P = 0;
+		FILE *fp = fopen(fn,"w");
+		srand(time(NULL));
 
-		for (m=0;m<10000;m++){
-			P = 0.0;
-			DIF = 0.5;
-			PERC=0;
-			n = 1;
 
-			while (DIF>TOL){
-				DIF = pow(0.5,n);
+		//loop para probabilidades
+		fp = fopen(fn, "a");
+		fprintf(fp, "Probabilidad; 0 si no percola, 1 si percola \n");
 
-				if (PERC == 0){
-					P = P + DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				else{
-					P = P - DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				n++;
-			}
+		//primer loop hasta 0.55
+		for (P=0; P<0.545; P=P+0.05){
 			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
 		}
-		fprintf(fp, "\n");
+
+		for (P=0.55; P<0.59; P=P+0.005){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.59; P<0.60; P=P+0.0001){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.60; P<0.65; P=P+0.005){
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		for (P=0.65; P<1; P=P+0.05){ //no sé por qué va hasta 0.75 en lugar dehasta 1
+			fprintf(fp, "%f \t", P);
+			for (m=0;m<M;m++){
+				poblar(red,N,P);
+				clasificar(red,N);
+				PERC = percola(red,N);
+				fprintf(fp, "%d \t", PERC);
+			}
+			fprintf(fp, "\n");
+		}
+
+		fclose(fp);
 		free(red);
 	}
-	fclose(fp);
 return 0;
 }
 
@@ -228,4 +261,18 @@ int percola(int *red, int N){
 			break;
 		}
 return p;
+}
+
+int cluster_size(int *red, int N){
+	int i,t;
+	int *clusters;
+	clusters = (int*)malloc(N*N/2*sizeof(int));
+	for (i=0; i<N*N; i++){
+		t = *(red+i);
+		clusters[t]++;
+	}
+	for (i=0; i<N*N; i++)
+		printf("%d ", *(clusters+i));
+	free(clusters);
+return 0;
 }

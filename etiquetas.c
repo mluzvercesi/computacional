@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> /* memset */
 #include <math.h>
 #include <time.h>
+#include <unistd.h> /* close */
 
 #define MAXFILENAME 100
 
@@ -16,63 +18,95 @@ int percola(int *red, int N);
 
 
 //------------MAIN-------------
-int main(){
-	int PERC,n,m,N;
-	double TOL = 0.0001;
-	double P, DIF;
-	int L[5] = {4, 16, 32, 64, 128};
-	FILE *fp;
+int main(){ //agregar como argumento la probabilidad y el tamaño de la red
+	double P;
+	int N=64; //tamaño de la red
 	srand(time(NULL));
 	int *red;
+	int i,j,t,k;
+	FILE *fp;
+
 
 	char fn[MAXFILENAME+1];
-	sprintf(fn,"proba_lado.txt"); 
-	fp = fopen(fn, "w"); //"a" es append, mientras que "w" sobreescribe
+	sprintf(fn,"ej4.txt"); //para que las probas de cada tamaño de red sean distintos archivos
+	fp = fopen(fn, "w");
+	fprintf(fp, "C0 la proba; C1 - C(N*N/2) tamaño de cluster de cada número en orden 0 1 2 3...;  C(N*N/2+1) - C(N*N/2+1 + N/2) etiquetas cluster percolante. \n");
 
-	fprintf(fp, "Lado; probabilidades de iteraciones \n");
+	int clusters[N*N/2];
+	int etiquetas[N];
+	red = (int*)malloc(N*N*sizeof(int));
 
-	for(int c = 0; c<5; c++){
-		N = L[c];
-		red = (int*)malloc(N*N*sizeof(int));
-		fprintf(fp, "%d \t", N);
+	P = 0.0;
 
-		for (m=0;m<10000;m++){
-			P = 0.0;
-			DIF = 0.5;
-			PERC=0;
-			n = 1;
+	for (P=0.0; P<1.0; P=P+0.01){
 
-			while (DIF>TOL){
-				DIF = pow(0.5,n);
-
-				if (PERC == 0){
-					P = P + DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				else{
-					P = P - DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				n++;
-			}
+		//loop de iteraciones para una misma probabilidad
+		for (k = 0; k<1000; k++){
 			fprintf(fp, "%f \t", P);
-		}
-		fprintf(fp, "\n");
-		free(red);
-	}
-	fclose(fp);
+			poblar(red,N,P);
+			clasificar(red,N);
+
+			memset(clusters, 0, N*N/2*sizeof(int) );
+			memset(etiquetas, 0, N*sizeof(int) );
+			for (i=0; i<N*N; i++){
+				t = *(red+i);
+				clusters[t]++;
+				if (i<N && *(red+i)!=0){
+					for (j=0; j<N; j++){
+						if (*(red+N*(N-1)+j) == *(red+i))
+							{etiquetas[i] = *(red+i);
+						}
+					}
+				}
+			}
+			for (i=0; i<N*N/2; i++){
+				fprintf(fp, "%d\t", clusters[i]); //imprime cluster size para cada etiqueta
+			}
+			for (i=0; i<N; i++){
+				fprintf(fp, "%d\t", etiquetas[i]); //imprime las etiquetas que percolan
+			}
+			fprintf(fp, "\n");
+			//devuelve una tabla donde cada fila corresponde a una proba y cada columna es el tamaño de un cluster, al final agrega las etiquetas de clusters percolantes
+		} //end loop iteraciones
+	} //end loop probabilidades
+
+	//ahora lo hace una vez más para pc
+	// P = 0.592;
+	// for (k = 0; k<1000; k++){
+	// 	poblar(red,N,P);
+	// 	clasificar(red,N);
+	//
+	// 	memset(clusters, 0, N*N/2*sizeof(int) );
+	// 	memset(etiquetas, 0, N*sizeof(int) );
+	// 	for (i=0; i<N*N; i++){
+	// 		t = *(red+i);
+	// 		clusters[t]++;
+	// 		if (i<N && *(red+i)!=0){
+	// 			for (j=0; j<N; j++){
+	// 				if (*(red+N*(N-1)+j) == *(red+i))
+	// 					{etiquetas[i] = *(red+i);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	fprintf(fp, "%f \t", P);
+	// 	for (i=0; i<N*N/2; i++){
+	// 		fprintf(fp, "%d\t", clusters[i]); //imprime cluster size para cada etiqueta
+	// 	}
+	// 	for (i=0; i<N; i++){
+	// 		fprintf(fp, "%d\t", etiquetas[i]); //imprime las etiquetas que percolan
+	// 	}
+	// 	fprintf(fp, "\n");
+	// }
+	free(red);
 return 0;
 }
 
 
 //----------FUNCIONES----------
 
-int poblar(int *red, int N, double P){
 //llena la red cuadrada de lado N con prob P
+int poblar(int *red, int N, double P){
 	int i;
 	float random;
 	for (i=0; i<N*N; i++)
@@ -83,11 +117,11 @@ int poblar(int *red, int N, double P){
 			*(red+i) = 0;
 		}
 return 0;
-}
+} //cierra la función
 
 
-int imprimir(int *red, int N){
 //para mostrar la red creada
+int imprimir(int *red, int N){
 	int i,j;
 	for (i=0; i<N; i++)
 		{
@@ -95,10 +129,11 @@ int imprimir(int *red, int N){
 			printf("%d ", *(red+N*i+j));
 		printf("\n");
 		}
+printf("\n");
 return 0;
-}
+} //cierra la función
 
-
+// le asigna etiquetas a los lugares de la red con valor 1
 int clasificar(int *red, int N){
 	int i,j;
 	int *frag; //contador de fragmentos o clusters
@@ -157,9 +192,9 @@ free(frag);
 free(historial);
 
 return 0;
-}
+} //cierra la función
 
-
+//les da la etiqueta verdadera a los valores
 int actualizar(int *local, int *historial, int S, int *frag){
 //si S=0 le pone etiqueta e incrementa frag
 //sino copia la etiqueta VERDADERA
@@ -173,16 +208,16 @@ int actualizar(int *local, int *historial, int S, int *frag){
 	*local = etiqueta_verdadera(historial,S);
 	}
 return 0;
-}
+} //cierra la función
 
-
+//??
 int etiqueta_verdadera(int *historial, int S){
 	while (*(historial+S)<0)
 		S=-(*(historial+S));
 return S;
-}
+} //cierra la función
 
-
+//corrige las etiquetas y les pone un - si las tuvo que cambiar
 int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 	int minimo, maximo;
 
@@ -210,11 +245,11 @@ int etiqueta_falsa(int *local, int *historial, int S1, int S2){
 // esto es por las dudas, ya debería valer minimo
 // ademas la ultima linea salva el caso S1=S2
 return 0;
-}
+} //cierra la función
 
 
+// Devuelve 1 si percola, 0 si no percola
 int percola(int *red, int N){
-	// Devuelve 1 si percola, 0 si no percola
 	int i,j;
 	int p = 0;
 	for (i=0; i<N; i++){
@@ -228,4 +263,4 @@ int percola(int *red, int N){
 			break;
 		}
 return p;
-}
+} //cierra la función

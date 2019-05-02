@@ -17,60 +17,52 @@ int percola(int *red, int N);
 
 //------------MAIN-------------
 int main(){
-	int PERC,n,m,N;
-	double TOL = 0.0001;
-	double P, DIF;
-	int L[5] = {4, 16, 32, 64, 128};
-	FILE *fp;
-	srand(time(NULL));
+	int PERC,n,i;
 	int *red;
+	double TOL = 0.02;
+	double P, DIF;
+	int N = 4; //tamaño de la red
 
-	char fn[MAXFILENAME+1];
-	sprintf(fn,"proba_lado.txt"); 
-	fp = fopen(fn, "w"); //"a" es append, mientras que "w" sobreescribe
+	srand(time(NULL));
+	P = 0.0;
+	DIF = 0.5;
+	PERC=0;
+	n = 1;
 
-	fprintf(fp, "Lado; probabilidades de iteraciones \n");
-
-	for(int c = 0; c<5; c++){
-		N = L[c];
+	while (DIF>TOL){
 		red = (int*)malloc(N*N*sizeof(int));
-		fprintf(fp, "%d \t", N);
+		DIF = pow(0.5,n);
 
-		for (m=0;m<10000;m++){
-			P = 0.0;
-			DIF = 0.5;
-			PERC=0;
-			n = 1;
-
-			while (DIF>TOL){
-				DIF = pow(0.5,n);
-
-				if (PERC == 0){
-					P = P + DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				else{
-					P = P - DIF;
-					poblar(red,N,P);
-					clasificar(red,N);
-					PERC = percola(red,N);
-				}
-				n++;
-			}
-			fprintf(fp, "%f \t", P);
+		if (PERC == 0){
+			P = P + DIF;
+			poblar(red,N,P);
+			imprimir(red,N);
+			printf(" ^ la nueva red con proba %f \n",P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			imprimir(red,N);
+			printf("^ la red clasificada\n");
 		}
-		fprintf(fp, "\n");
+		else{
+			P = P - DIF;
+			poblar(red,N,P);
+			imprimir(red,N);
+			printf(" ^ la nueva red con proba %f \n",P);
+			clasificar(red,N);
+			PERC = percola(red,N);
+			imprimir(red,N);
+			printf("^ la red clasificada \n");
+		}
+		red=NULL;
 		free(red);
+		n++;
 	}
-	fclose(fp);
+
 return 0;
 }
 
 
 //----------FUNCIONES----------
-
 int poblar(int *red, int N, double P){
 //llena la red cuadrada de lado N con prob P
 	int i;
@@ -79,8 +71,6 @@ int poblar(int *red, int N, double P){
 		{random = (float)rand()/(float)RAND_MAX; //se podria mejorar este random
 		if (random < P)
 			*(red+i) = 1;
-		else
-			*(red+i) = 0;
 		}
 return 0;
 }
@@ -152,8 +142,8 @@ int clasificar(int *red, int N){
 		{j = *(red+i);
 		*(red+i) = etiqueta_verdadera(historial, j);
 		}
-
-free(frag);
+// free(red);
+// free(frag);
 free(historial);
 
 return 0;
