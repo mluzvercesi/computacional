@@ -69,4 +69,20 @@ for i in range(len(probs)):
     coeffs = np.polyfit(np.log(abs(probs[i:i+1]-p_c)),np.log(m2[i:i+1]),1)
     gamma[i] = coeffs[0] #aca estan las dos curvas, faltaria separar en menos y mas
 
+ind_critica = 26 # indice donde esta la probabilidad crítica, o la mas cercana
+gamma_mas = gamma[ind_critica+1:]
+gamma_menos = gamma[1:ind_critica]
+probs_mas = abs(probs[ind_critica+1:]-p_c)
+probs_menos = abs(probs[1:ind_critica]-p_c)
+
+plt.figure(figsize=([16,5]))
+plt.subplot(1,2,1)
+plt.plot(probs,m2,'.')
+plt.xlabel('p')
+plt.ylabel('$m_2$')
+plt.subplot(1,2,2)
+plt.plot(probs_mas,gamma_mas,'.r',label='$\gamma_+$')
+plt.plot(probs_menos,gamma_menos,'.b',label='$\gamma_-$')
+plt.xlabel('$|p-p_c|$')
+plt.ylabel('$\gamma$')
 
