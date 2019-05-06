@@ -14,7 +14,7 @@ int actualizar(int *local, int *historial, int S, int *frag);
 int etiqueta_verdadera(int *historial, int S);
 int etiqueta_falsa(int *local, int *historial, int S1, int S2);
 int percola(int *red, int N);
-int ns(int *etiqueta, int *dens_cluster, int N)
+int ns(int *etiqueta, int *dens_cluster, int N);
 
 
 
@@ -27,47 +27,66 @@ int main(){ //agregar como argumento la probabilidad y el tamaño de la red
 	int i,j,t,k;
 	FILE *fp;
 	int *clusters;
-	int *etiquetas;
-	int *densidad;
-	int counter[N*N+1]={0};
+	int etiqueta = 0;
+	double *densidad;
 
 
 	char fn[MAXFILENAME+1];
-	sprintf(fn,"prueba.txt"); //para que las probas de cada tamaño de red sean distintos archivos
+	sprintf(fn,"ns_lado%d.txt",N); //para que cada tamaño de red sea un archivo distinto
 	fp = fopen(fn, "w");
-	fprintf(fp, "C0 la proba; C1 - C(N*N/2) tamaño de cluster de cada número en orden 0 1 2 3...;  C(N*N/2+1) - C(N*N/2+1 + N/2) etiquetas cluster percolante. \n");
+	fprintf(fp, "C0 la proba; C1 - C(N*N+1) tamaño de cluster promedio de cada número en orden 0 1 2 3...\n");
 
 	red = (int*)malloc(N*N*sizeof(int));
+	clusters = calloc(N*N/2, sizeof(int));
+	densidad = calloc(N*N+1,sizeof(double));
 
-	P = 0.0;
-
-	// for (P=0.5; P<0.65; P+=0.0001){
-
-		for (k = 0; k<10; k++){ //acá tiene que decir k<27000
-			fprintf(fp, "%f \t", P);
+	for (P=0.35; P<0.65; P+=0.001){
+		for (i=0; i<N*N+1; i++){
+			*(densidad+i) = 0;
+		}
+		fprintf(fp, "%f \t", P);
+		for (k = 0; k<10000; k++){ //acá tiene que decir k<27000
 			poblar(red,N,P);
 			clasificar(red,N);
-			clusters = calloc(N*N/2, sizeof(int));
-			etiquetas = calloc(N,sizeof(int));
+			
+			//lleno de ceros la variable clusters que va a tener el tamanio de cada cluster por etiqueta
+			for (i=0; i<N*N/2; i++){
+				clusters[i] = 0;
+			}
+
+			// Cuenta cantidad de elementos en cada cluster y si hay alguna etiqueta percolante
 			for (i=0; i<N*N; i++){
 				t = *(red+i);
 				clusters[t]++;
-				if (i<N && *(red+i)!=0){
+				if (i<N && *(red+i)!=0){ //si la etiqueta de la primera fila se repite en la ultima, es percolante
 					for (j=0; j<N; j++){
-						if (*(red+N*(N-1)+j) == *(red+i))
-							{etiquetas[i] = *(red+i);
+						if (*(red+N*(N-1)+j) == *(red+i)){
+							etiqueta = *(red+i);
 						}
 					}
 				}
 			}
-			for (i=0; i<N*N; i++){
-				densidad = ns(etiquetas, clusters, N); //imprime cluster size para cada etiqueta
+			
+			// Recorre clusters y suma 1 en cada tamanio correspondiente en densidad
+			for (i=0; i<N*N/2; i++){
+				int size = *(clusters+i);
+				densidad[size]++;
 			}
-			fprintf(fp, "%d \n", densidad);
-			//devuelve una tabla donde cada fila corresponde a una proba y cada columna es el tamaño de un cluster, al final agrega las etiquetas de clusters percolantes
-		} //end loop iteraciones
-	// } //end loop probabilidades
+			// saco el cluster percolante, si hay alguno
+			if (etiqueta!=0){
+				densidad[clusters[etiqueta]]--; //clusters[etiqueta] da el tamanio del percolante
+			}
+		}//end loop iteraciones
+		
+		for (i=0; i<N*N+1; i++){
+			*(densidad+i) = *(densidad+i)/10000;
+			fprintf(fp, "%f \t", *(densidad+i));
+		}
+		fprintf(fp, "\n");
+	} //end loop probabilidades
 	free(red);
+	free(clusters);
+	free(densidad);
 return 0;
 }
 
@@ -217,12 +236,12 @@ return 0;
 } //cierra la función
 
 //este toma el cluster y me va a devolver el ns ya hecho array. después lo único que hay qye hacer en el main es llamar a este y dividir por 27000 una vez que ya haya corrido todo
-int ns(int *etiqueta, int *dens_cluster, int N){
+int ns(int *etiqueta_percolante, int *cluster_sizes_por_etiqueta, int N){
 	int size;
 	for (int s=0; s<N*N/2; s++){
-		if(*(etiqueta+s)){
-			size = *etiqueta;
-			*(dens_cluster + size) = *(dens_cluster + size)+1;
+		if(*(etiqueta_percolante+s)){
+			size = *etiqueta_percolante;
+			*(cluster_sizes_por_etiqueta + size) = *(cluster_sizes_por_etiqueta + size)+1;
 		}
 	}
 

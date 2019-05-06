@@ -1,65 +1,52 @@
 
-# coding: utf-8
-
-# In[1]:
-
-
 import numpy as np
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
 path = os.getcwd()
-#import copy
+import copy
 
 
-# ----Gamma matching----
+# ## Gamma matching
 # Para redes de lado 6 y 128
 
 
 N = 6 #hacer lo mismo para 128
-cant_prob = 1
-str_start = "etiquetas_cluster_size_lado{:d}".format(N)
-s = np.asarray([i for i in range(1,16)]) #tamaño de clusters del 1 al 15
-n_s = np.zeros([len(s),cant_prob]) #cantidad de clusters de cada tamaño del 1 al 15
-probs = np.zeros(cant_prob)
-m2 = np.zeros(cant_prob) #momento de orden 2
+filename = "\\ns_lado{:d}.txt".format(N)
+df = pd.read_csv(path+filename,header=None,sep='\t',skiprows=1)
+
 p_c = 0.5927
+p = df.iloc[:,0].values
+n_s = df.iloc[:,1:].values
+s = np.array([i for i in range(df.values.shape[1]-1)])
 
-for m in range(cant_prob):
-    N_S = np.zeros([10000,len(s)])
-    l = 0 # contador de probabilidades
-    for filename in os.listdir(path):   
-        if filename.startswith(str_start):    
-            df = pd.read_csv(filename,header=None,sep='\t',skiprows=1)
+m2 = np.zeros(len(p))
+for i in range(len(m2)):
+    m2[i] = np.nansum(n_s[i,:]*s**2)
 
-            probs[m] = float(filename.split("_")[-1].replace("p","").replace(".txt",""))
-            # probabilidad sacada del nombre del archivo
-
-            nfilas = df.values.shape[0]
-            ncols = df.values.shape[1]
-            nclusters = int(N*N/2) # De col 0 a L*L/2 son tamaños de cluster (contamos ceros)
-
-            # me quedo con cluster size para cada etiqueta de cluster
-            clusters = df.iloc[:,1:nclusters] #a partir de 1 para que no considere los 0s que son sitios vacios
-            clusters = clusters.values
-            for j in range(nfilas):
-                for i in range(len(s)):
-                    N_S[j,i] = (clusters[j,:]==s[i]).sum() # devuelve la cantidad de clusters de tamaño s para cada iteracion
-            l = l+1
-
-    for k in range(len(s)):
-        n_s[k,m] = np.mean(N_S[:,k])
-
-    m2[m] = sum(n_s[:,m]*s**2)
+plt.plot(p,m2)
 
 
 
-#hace falta hacer esto? para no contar 0s
-N_S_nan = copy.deepcopy(N_S)
-N_S_nan[N_S_nan == 0] = np.nan
-n_s_nan = np.zeros(len(s))
-for k in range(len(s)):
-    n_s_nan[k] = np.nanmean(N_S_nan[:,k])
+N = 32 #hacer lo mismo para 128
+filename = "\\ns_lado{:d}.txt".format(N)
+df = pd.read_csv(path+filename,header=None,sep='\t',skiprows=1)
+
+p_c = 0.5927
+p = df.iloc[:,0].values
+n_s = df.iloc[:,1:].values
+s = np.array([i for i in range(df.values.shape[1]-1)])
+
+m2 = np.zeros(len(p))
+for i in range(len(m2)):
+    m2[i] = np.nansum(n_s[i,:]*s**2)
+
+plt.plot(p,m2)
+plt.xlabel('p')
+plt.ylabel('$m^2$')
+
+
+---------------------------------------
 
 
 # Obtengo un gamma para cada par de puntos consecutivos (de p-p_c)
@@ -69,11 +56,12 @@ for i in range(len(probs)):
     coeffs = np.polyfit(np.log(abs(probs[i:i+1]-p_c)),np.log(m2[i:i+1]),1)
     gamma[i] = coeffs[0] #aca estan las dos curvas, faltaria separar en menos y mas
 
-ind_critica = 26 # indice donde esta la probabilidad crítica, o la mas cercana
-gamma_mas = gamma[ind_critica+1:]
-gamma_menos = gamma[1:ind_critica]
-probs_mas = abs(probs[ind_critica+1:]-p_c)
-probs_menos = abs(probs[1:ind_critica]-p_c)
+
+#hasta probs[25], probs[26] es la critica
+gamma_mas = gamma[27:]
+gamma_menos = gamma[1:26]
+probs_mas = abs(probs[27:]-p_c)
+probs_menos = abs(probs[1:26]-p_c)
 
 plt.figure(figsize=([16,5]))
 plt.subplot(1,2,1)
