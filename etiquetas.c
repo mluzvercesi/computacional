@@ -44,7 +44,7 @@ int main(){ //agregar como argumento la probabilidad y el tamaño de la red
 		for (i=0; i<N*N+1; i++){
 			*(densidad+i) = 0;
 		}
-		fprintf(fp, "%f \t", P);
+		fprintf(fp, "%f", P);
 		for (k = 0; k<10000; k++){ //acá tiene que decir k<27000
 			poblar(red,N,P);
 			clasificar(red,N);
@@ -70,17 +70,19 @@ int main(){ //agregar como argumento la probabilidad y el tamaño de la red
 			// Recorre clusters y suma 1 en cada tamanio correspondiente en densidad
 			for (i=0; i<N*N/2; i++){
 				int size = *(clusters+i);
-				densidad[size]++;
+				if (size!=0){
+					densidad[size]++;
+				}
 			}
 			// saco el cluster percolante, si hay alguno
 			if (etiqueta!=0){
-				densidad[clusters[etiqueta]]--; //clusters[etiqueta] da el tamanio del percolante
+				densidad[clusters[etiqueta]] = densidad[clusters[etiqueta]]-1; //clusters[etiqueta] da el tamanio del percolante
 			}
 		}//end loop iteraciones
 		
 		for (i=0; i<N*N+1; i++){
 			*(densidad+i) = *(densidad+i)/10000;
-			fprintf(fp, "%f \t", *(densidad+i));
+			fprintf(fp, "\t%f", *(densidad+i));
 		}
 		fprintf(fp, "\n");
 	} //end loop probabilidades
